@@ -67,12 +67,19 @@ def run_search_pipeline(job: dict, top_k: int, shortlist_n: int, filters: dict =
 
     candidate_summaries = []
     for c in scored_candidates:
+        skill_names = [s.get("name", "") if isinstance(s, dict) else str(s) for s in c["skills"]][:10]
+        career_str = ""
+        for role in c.get("career_summary", [])[:2]:
+            if isinstance(role, dict):
+                career_str += f"{role.get('title', '')} at {role.get('company', '')}; "
+
         candidate_summaries.append({
             "candidate_id": c["candidate_id"],
             "name": c["full_name"],
             "headline": c["headline"],
-            "skills": c["skills"],
-            "score_breakdown": c["score_breakdown"]
+            "skills": skill_names,
+            "career": career_str,
+            "score": round(c["match_score"], 2)
         })
 
     reranked = rerank_candidates(job, parsed_signals, candidate_summaries)

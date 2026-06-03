@@ -4,6 +4,7 @@ from app.db.database import get_db_connection
 from app.dependencies import get_current_user
 import uuid
 import hashlib
+import json
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -37,14 +38,14 @@ def register(request: RegisterRequest):
         elif request.role == "candidate":
             cursor.execute(
                 """INSERT INTO candidates (
-                    user_id, full_name, headline, email, location, years_exp,
+                    id, user_id, full_name, headline, email, location, years_exp,
                     current_title, current_company, domain, skills,
-                    education, career_history, behavioral
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '[]', '[]', '{}')""",
+                    education, career_history, certifications, languages, redrob_signals
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '[]', '[]', '[]', '[]', '{}')""",
                 (
-                    user_id, request.full_name, request.headline, request.email, 
+                    f"CAND_{str(uuid.uuid4().int)[:7]}", user_id, request.full_name, request.headline, request.email, 
                     request.location, request.years_exp, request.current_title, 
-                    request.current_company, request.domain, request.skills
+                    request.current_company, request.domain, json.dumps(request.skills)
                 )
             )
             

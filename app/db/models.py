@@ -15,11 +15,11 @@ class RegisterRequest(BaseModel):
     # Candidate fields
     headline: Optional[str] = None
     location: Optional[str] = None
-    years_exp: Optional[int] = 0
+    years_exp: Optional[float] = 0.0
     current_title: Optional[str] = None
     current_company: Optional[str] = None
     domain: Optional[list[str]] = []
-    skills: Optional[list[str]] = []
+    skills: Optional[list[dict]] = []
 
 class LoginRequest(BaseModel):
     email: str
@@ -57,7 +57,7 @@ class CareerEntry(BaseModel):
     company: str
     start: str          # "2020-01"
     end: Optional[str]  # None = current role
-    desc: str
+    description: str
 
 class BehavioralSignals(BaseModel):
     github_repos:  int = 0
@@ -71,28 +71,33 @@ class CandidateCreate(BaseModel):
     headline:        Optional[str] = None
     email:           Optional[str] = None
     location:        Optional[str] = None
-    years_exp:       int
+    years_exp:       float
     current_title:   str
     current_company: str
     domain:          list[str]
-    skills:          list[str]
-    education:       list[EducationEntry] = []
-    career_history:  list[CareerEntry]
-    behavioral:      BehavioralSignals = BehavioralSignals()
+    skills:          list[dict]
+    education:       list[dict] = []
+    career_history:  list[dict]
+    certifications:  list[dict] = []
+    languages:       list[dict] = []
+    redrob_signals:  dict = {}
+
 
 class CandidateUpdate(BaseModel):
     full_name:       Optional[str] = None
     headline:        Optional[str] = None
     email:           Optional[str] = None
     location:        Optional[str] = None
-    years_exp:       Optional[int] = None
+    years_exp:       Optional[float] = None
     current_title:   Optional[str] = None
     current_company: Optional[str] = None
     domain:          Optional[list[str]] = None
-    skills:          Optional[list[str]] = None
-    education:       Optional[list[EducationEntry]] = None
-    career_history:  Optional[list[CareerEntry]] = None
-    behavioral:      Optional[BehavioralSignals] = None
+    skills:          Optional[list[dict]] = None
+    education:       Optional[list[dict]] = None
+    career_history:  Optional[list[dict]] = None
+    certifications:  Optional[list[dict]] = None
+    languages:       Optional[list[dict]] = None
+    redrob_signals:  Optional[dict] = None
 
 # ── Search ───────────────────────────────────────
 class SearchFilters(BaseModel):
@@ -115,7 +120,7 @@ class ScoreBreakdown(BaseModel):
 
 class CandidateResult(BaseModel):
     rank:                int
-    candidate_id:        UUID4
+    candidate_id:        str
     full_name:           str
     headline:            Optional[str]
     match_score:         float
@@ -131,7 +136,7 @@ class SearchResponse(BaseModel):
 
 # ── Feedback ─────────────────────────────────────
 class FeedbackRequest(BaseModel):
-    candidate_id: UUID4
+    candidate_id: str
     signal:       str  # "up" | "down"
 
 # ── Stats ────────────────────────────────────────

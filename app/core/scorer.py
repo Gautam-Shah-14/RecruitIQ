@@ -2,9 +2,9 @@ import math
 
 SENIORITY_MAP = {"junior": 1, "mid": 2, "senior": 3, "staff": 4, "principal": 5}
 
-def compute_skill_match(jd_skills: list[str], candidate_skills: list[str]) -> float:
-    jd_set   = set(s.lower() for s in jd_skills)
-    cand_set = set(s.lower() for s in candidate_skills)
+def compute_skill_match(jd_skills: list[str], candidate_skills: list) -> float:
+    jd_set   = set(s.lower() for s in jd_skills if isinstance(s, str))
+    cand_set = set((s.get("name", "").lower() if isinstance(s, dict) else str(s).lower()) for s in candidate_skills)
     if not jd_set:
         return 0.0
     intersection = len(jd_set & cand_set)
