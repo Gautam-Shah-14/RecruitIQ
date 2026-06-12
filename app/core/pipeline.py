@@ -1,7 +1,10 @@
 from app.core.jd_parser import parse_jd
 from app.core.embedder import get_jd_embedding
 from app.core.vector_store import query_candidates
-from app.core.scorer import compute_skill_match, compute_seniority_fit, compute_composite_score
+from app.core.scorer import (
+    compute_skill_match, compute_seniority_fit, compute_composite_score,
+    compute_behavioral, detect_honeypot, compute_consulting_penalty
+)
 from app.core.reranker import rerank_candidates
 import time
 import uuid
@@ -41,10 +44,19 @@ def run_search_pipeline(job: dict, top_k: int, shortlist_n: int, filters: dict =
         skill_match = compute_skill_match(jd_skills, cand.get("skills", []))
         seniority_fit = compute_seniority_fit(jd_seniority, cand.get("years_exp", 0))
         trajectory_score = cand.get("trajectory_score", 0.5)
-        behavioral_score = cand.get("activity_score", 0.5)
+
+        # Compute behavioral from redrob signals at query time (recency-sensitive)
+        redrob_signals = cand.get("redrob_signals", {})
+        behavioral_score = compute_behavioral(redrob_signals) if redrob_signals else cand.get("activity_score", 0.5)
+
+        # Challenge-specific: honeypot detection & consulting penalty
+        is_honeypot = detect_honeypot(cand)
+        career_history = cand.get("career_history", [])
+        consulting_pen = compute_consulting_penalty(career_history)
 
         match_score = compute_composite_score(
-            semantic_similarity, skill_match, seniority_fit, trajectory_score, behavioral_score
+            semantic_similarity, skill_match, seniority_fit, trajectory_score, behavioral_score,
+            honeypot=is_honeypot, consulting_penalty=consulting_pen
         )
 
         scored_candidates.append({

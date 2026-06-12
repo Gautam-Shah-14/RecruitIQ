@@ -14,6 +14,14 @@ def get_candidate_embedding(candidate) -> list[float]:
     if isinstance(candidate, dict):
         text  = f"{candidate.get('current_title', '')} at {candidate.get('current_company', '')}. "
         
+        # Include headline and summary for richer semantic embedding
+        headline = candidate.get('headline', '')
+        if headline:
+            text += f"{headline}. "
+        summary = candidate.get('summary', '')
+        if summary:
+            text += f"{summary} "
+        
         skills = candidate.get('skills', [])
         skill_names = [s.get('name', '') if isinstance(s, dict) else str(s) for s in skills]
         text += f"Skills: {', '.join(skill_names)}. "

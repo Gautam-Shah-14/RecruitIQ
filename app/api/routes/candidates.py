@@ -4,7 +4,7 @@ from app.db.database import get_db_connection
 from app.dependencies import require_service_role, get_current_user
 from app.core.embedder import get_candidate_embedding
 from app.core.vector_store import add_candidates
-from app.core.scorer import compute_trajectory
+from app.core.scorer import compute_trajectory, compute_behavioral
 import uuid
 import json
 
@@ -22,8 +22,8 @@ def process_and_ingest(candidates: list[CandidateCreate]):
         c_dict["id"] = cid
         c_dict["trajectory_score"] = compute_trajectory(c_dict["career_history"])
         
-        # fallback for new format
-        activity_score = (c_dict.get("redrob_signals", {}).get("profile_completeness_score", 50) / 100.0)
+        # Compute behavioral score from redrob signals
+        activity_score = compute_behavioral(c_dict.get("redrob_signals", {}))
         c_dict["activity_score"] = activity_score
         c_dict["embedding_id"] = cid
         
@@ -136,7 +136,7 @@ def update_candidate(id: str, candidate_update: CandidateCreate):
             
         c = candidate_update.model_dump()
         c["trajectory_score"] = compute_trajectory(c["career_history"])
-        c["activity_score"] = (c.get("redrob_signals", {}).get("profile_completeness_score", 50) / 100.0)
+        c["activity_score"] = compute_behavioral(c.get("redrob_signals", {}))
         
         text  = f"{c.get('current_title', '')} at {c.get('current_company', '')}. "
         skill_names = [s.get('name', '') for s in c.get('skills', []) if isinstance(s, dict)]

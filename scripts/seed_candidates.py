@@ -5,6 +5,7 @@ import os
 from dotenv import load_dotenv
 from app.core.embedder import get_candidate_embedding
 from app.core.vector_store import add_candidates
+from app.core.scorer import compute_trajectory, compute_behavioral
 
 load_dotenv()
 
@@ -61,9 +62,9 @@ def seed_data():
             "location": c["profile"].get("location", "")
         })
         
-        # Calculate dummy trajectory/behavioral using old logic or defaults
-        trajectory_score = 0.5  # placeholder
-        activity_score = (c.get("redrob_signals", {}).get("profile_completeness_score", 50) / 100.0)
+        # Calculate scores using real implementations
+        trajectory_score = compute_trajectory(c.get("career_history", []))
+        activity_score = compute_behavioral(c.get("redrob_signals", {}))
         
         # Insert into PG
         cursor.execute("""
