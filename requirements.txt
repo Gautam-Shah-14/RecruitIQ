@@ -77,7 +77,6 @@ postgrest==0.16.11
 posthog==7.16.3
 propcache==0.5.2
 protobuf==6.33.6
-psycopg2==2.9.12
 psycopg2-binary==2.9.9
 pyasn1==0.6.3
 pycparser==3.0
